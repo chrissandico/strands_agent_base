@@ -28,19 +28,57 @@ export AWS_REGION=us-west-2  # or your preferred region
 
 ## Usage
 
-Run the agent interactively:
+### Run the agent interactively:
 
 ```bash
+# Standard synchronous mode
 python -m basic_strands_agent.agent
+
+# Async streaming mode
+python -m basic_strands_agent.agent --async
 ```
 
-Or import and use in your own code:
+### Use in your code:
 
 ```python
+# Synchronous usage
 from basic_strands_agent.agent import run_agent
 
 response = run_agent("Hello, how are you?")
 print(response.message)
+
+# Asynchronous usage with streaming
+import asyncio
+from basic_strands_agent.agent import stream_agent_async
+
+async def example():
+    agent_stream = stream_agent_async("Hello, how are you?")
+    async for event in agent_stream:
+        if "data" in event:
+            print(event["data"], end="")
+
+asyncio.run(example())
+```
+
+### Run the FastAPI server:
+
+```bash
+python -m basic_strands_agent.api_example
+```
+
+Then access the API at:
+- http://localhost:8000/docs - API documentation
+- POST to http://localhost:8000/stream - Streaming endpoint
+- POST to http://localhost:8000/chat - Regular chat endpoint
+
+### Advanced async examples:
+
+```bash
+# Interactive async chat
+python -m basic_strands_agent.async_example --interactive
+
+# Process multiple queries concurrently
+python -m basic_strands_agent.async_example --concurrent
 ```
 
 ## Features
@@ -51,6 +89,8 @@ print(response.message)
 - Error handling for common issues
 - Detailed logging with callback handler
 - Trace attributes for better observability
+- Async iterators for streaming responses
+- FastAPI integration for web applications
 
 ## Customization
 

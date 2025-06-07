@@ -4,3 +4,5 @@ boto3>=1.26.0,<2.0.0
 python-dotenv>=1.0.0
 fastapi>=0.95.0,<1.0.0
 uvicorn>=0.21.0,<1.0.0
+mangum>=0.17.0,<1.0.0
+aws-lambda-powertools>=2.30.0,<3.0.0

@@ -1,6 +1,6 @@
-# Vercel Strands Agent with Claude 3.7
+# AWS Lambda Strands Agent with Claude 3.7
 
-A Strands agent implementation that uses Anthropic Claude 3.7 Sonnet via Amazon Bedrock with inference profile ARN, configured for secure deployment on Vercel.
+A Strands agent implementation that uses Anthropic Claude 3.7 Sonnet via Amazon Bedrock with inference profile ARN, configured for secure deployment on AWS Lambda with Function URL.
 
 ## Security Best Practices for Secrets
 
@@ -51,47 +51,144 @@ ENVIRONMENT=development
 python -m basic_strands_agent.agent
 ```
 
-## Deploying to Vercel
+## Deploying to AWS Lambda with Function URL
 
-1. Install the Vercel CLI:
+### Prerequisites
 
-```bash
-npm install -g vercel
-```
-
-2. Login to Vercel:
+1. Install the AWS SAM CLI:
 
 ```bash
-vercel login
+# For Windows (using pip)
+pip install aws-sam-cli
+
+# For macOS (using Homebrew)
+brew install aws-sam-cli
+
+# For Linux
+pip install aws-sam-cli
 ```
 
-3. Deploy to Vercel:
+2. Install Docker Desktop:
+   - [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop)
+   - [Docker Desktop for Mac](https://www.docker.com/products/docker-desktop)
+   - [Docker for Linux](https://docs.docker.com/engine/install/)
+
+3. Configure AWS credentials:
 
 ```bash
-vercel
+aws configure
 ```
 
-4. Configure environment variables in Vercel:
-   - Go to the Vercel dashboard
-   - Select your project
-   - Navigate to Settings > Environment Variables
-   - Add the following variables:
-     - `AWS_ACCESS_KEY_ID`
-     - `AWS_SECRET_ACCESS_KEY`
-     - `AWS_DEFAULT_REGION`
-     - `ENVIRONMENT` (set to "production")
+### Deployment Options
 
-5. Redeploy with the environment variables:
+This project includes enhanced deployment scripts that ensure cross-platform compatibility between Windows, macOS, Linux, and AWS Lambda's Linux environment:
+
+#### For Windows:
+
+```powershell
+# Navigate to the deployment templates directory
+cd deployment_templates
+
+# Deploy to development environment
+.\deploy.ps1 -env development
+
+# Deploy to production with secrets
+.\deploy.ps1 -env production -deploySecrets
+```
+
+#### For macOS/Linux:
 
 ```bash
-vercel --prod
+# Navigate to the deployment templates directory
+cd deployment_templates
+
+# Make the script executable
+chmod +x deploy.sh
+
+# Deploy to development environment
+./deploy.sh --env development
+
+# Deploy to production with secrets
+./deploy.sh --env production --deploy-secrets
 ```
 
-## Secret Rotation Best Practices
+#### Manual SAM Deployment:
 
-1. Regularly rotate your AWS credentials
-2. Update the rotated credentials in Vercel's environment variables
-3. No code changes required when rotating secrets
+```bash
+# Navigate to the project directory
+cd path/to/project
+
+# Build the SAM application
+sam build -t deployment_templates/sam-template.yaml
+
+# Deploy the application
+sam deploy --guided
+```
+
+### Cross-Platform Compatibility
+
+The deployment scripts include several improvements to ensure compatibility between Windows and Lambda's Linux environment:
+
+- **Docker-Based Dependency Installation**: Dependencies are installed in a Lambda-compatible environment
+- **Package Optimization**: Unnecessary files are removed to reduce package size
+- **Enhanced Error Handling**: Comprehensive error handling for more reliable deployments
+
+For more details, see the [Deployment Improvements](docs/deployment_improvements.md) document.
+
+4. Configure environment variables in AWS Lambda:
+   - During the guided deployment, you'll be prompted for environment variables
+   - Alternatively, you can set them in the AWS Lambda console:
+     - Go to the AWS Lambda console
+     - Select your function
+     - Navigate to Configuration > Environment variables
+     - Add the following variables:
+       - `AWS_DEFAULT_REGION` (set automatically by Lambda)
+       - `ENVIRONMENT` (set to "production")
+
+5. Access your Lambda function via the Function URL:
+   - The Function URL will be displayed in the outputs of the SAM deployment
+   - You can also find it in the AWS Lambda console under Configuration > Function URL
+
+## AWS Secrets Manager Integration
+
+This project includes integration with AWS Secrets Manager for secure storage and retrieval of sensitive information:
+
+1. **Automatic Environment Detection**
+   - Automatically detects if running locally or in Lambda
+   - Uses environment variables for local development
+   - Uses AWS Secrets Manager for production environments
+
+2. **Secure Credential Storage**
+   - Stores AWS credentials in Secrets Manager
+   - Supports JSON-formatted secrets for multiple values
+   - Implements caching to minimize API calls
+
+3. **Deployment Options**
+   - CloudFormation template for creating secrets
+   - Deployment scripts for managing secrets
+   - Support for different environments (dev/staging/prod)
+
+4. **Secret Rotation**
+   - Supports automatic secret rotation
+   - Handles secret rotation gracefully in the application
+   - No code changes required when rotating secrets
+
+## Secret Management Best Practices
+
+1. **Regularly Rotate Credentials**
+   - Use AWS Secrets Manager's rotation feature
+   - Set up automatic rotation for production environments
+   - Monitor rotation events with CloudTrail
+
+2. **Use Least Privilege**
+   - Create IAM roles with minimal permissions
+   - Restrict access to secrets by environment
+   - Use resource-based policies for additional security
+
+3. **Monitor Access**
+   - Enable CloudTrail logging for Secrets Manager
+   - Set up alerts for unauthorized access attempts
+   - Review access logs regularly
 
 ## Security Considerations
 

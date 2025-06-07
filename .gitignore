@@ -25,5 +25,16 @@ var/
 .installed.cfg
 *.egg
 
-# Vercel
-.vercel
+# AWS Lambda deployment packages
+.aws-sam/
+deployment_templates/packaged/
+*.zip
+
+# Test files
+tests/
+
+#Deployment templates
+deployment_templates/
+
+# Documentation
+docs/
